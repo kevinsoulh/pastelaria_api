@@ -1,0 +1,65 @@
+networks:
+  application:
+    driver: bridge
+
+volumes:
+    mysql-data-comerc:
+        name: mysql-data-comerc
+        driver: local
+    redis-data-comerc:
+        name: redis-data-comerc
+        driver: local
+
+services:
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+      args:
+        PHP_VERSION: '8.4.0-fpm-bullseye'
+    volumes:
+      - ./domain:/var/www/app
+    ports:
+      - "80:80" # http
+      - "443:443" # https
+    networks:
+      - application
+
+  mysql:
+    container_name: mysql_8
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: comerc
+      MYSQL_DATABASE: comerc
+      MYSQL_USER: comerc
+      MYSQL_PASSWORD: comerc
+    volumes:
+      - mysql-data-comerc:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+    - application
+
+      
+  redis:
+    container_name: redis
+    image: redis:6.2
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data-comerc:/data
+    networks:
+      - application
+
+  mailhog:
+    container_name: mailhog
+    image: mailhog/mailhog
+    restart: always
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - application
