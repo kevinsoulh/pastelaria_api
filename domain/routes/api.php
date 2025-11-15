@@ -6,26 +6,20 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\OrderController;
 
-// Public routes - no authentication required for this pastry shop API
 Route::prefix('v1')->group(function () {
     
-    // Customer routes
     Route::apiResource('customers', CustomerController::class);
     
-    // Product routes
     Route::apiResource('products', ProductController::class);
     
-    // Order routes
     Route::apiResource('orders', OrderController::class);
     
-    // Additional order routes
     Route::get('orders-statistics', [OrderController::class, 'statistics'])
         ->name('orders.statistics');
         
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])
         ->name('orders.update-status');
         
-    // Customer orders
     Route::get('customers/{customer}/orders', function ($customer) {
         $customerModel = \App\Models\Customer::findOrFail($customer);
         $orders = $customerModel->orders()->with('products')->get();
@@ -36,7 +30,6 @@ Route::prefix('v1')->group(function () {
         ]);
     })->name('customers.orders');
     
-    // Product orders
     Route::get('products/{product}/orders', function ($product) {
         $productModel = \App\Models\Product::findOrFail($product);
         $orders = $productModel->orders()->with('customer')->get();
@@ -48,14 +41,12 @@ Route::prefix('v1')->group(function () {
     })->name('products.orders');
 });
 
-// Protected routes (if authentication is needed later)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
 });
 
-// Route for getting API documentation/endpoints
 Route::get('/endpoints', function () {
     return response()->json([
         'success' => true,
